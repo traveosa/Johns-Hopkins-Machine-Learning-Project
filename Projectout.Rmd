@@ -56,6 +56,8 @@ qdafit <- train(classe ~ ., data = newtrain, method = "qda", trControl = control
 rforfit <- randomForest(classe ~ ., data = newtrain)
 ```
 
+We expect the linear discriminant analysis error rate to be highest, due to the assumptions made by the algorithm.
+
 ##Test Models on Created Test Set
 ```{r testalgs}
 confusionMatrix(newtest$classe, predict(ldafit, newtest))$overall[1]

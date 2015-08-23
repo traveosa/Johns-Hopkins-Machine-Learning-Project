@@ -109,18 +109,19 @@ controls &lt;- trainControl(method = &quot;repeatedcv&quot;, number = 10, repeat
 ldafit &lt;- train(classe ~ ., data = newtrain, method = &quot;lda&quot;, trControl = controls)
 qdafit &lt;- train(classe ~ ., data = newtrain, method = &quot;qda&quot;, trControl = controls)
 rforfit &lt;- randomForest(classe ~ ., data = newtrain)</code></pre>
+<p>We expect the linear discriminant analysis error rate to be highest, due to the assumptions made by the algorithm.</p>
 </div>
 <div id="test-models-on-created-test-set" class="section level2">
 <h2>Test Models on Created Test Set</h2>
 <pre class="r"><code>confusionMatrix(newtest$classe, predict(ldafit, newtest))$overall[1]</code></pre>
 <pre><code>##  Accuracy 
-## 0.7101105</code></pre>
+## 0.7065421</code></pre>
 <pre class="r"><code>confusionMatrix(newtest$classe, predict(qdafit, newtest))$overall[1]</code></pre>
 <pre><code>##  Accuracy 
-## 0.8905692</code></pre>
+## 0.8963466</code></pre>
 <pre class="r"><code>confusionMatrix(newtest$classe, predict(rforfit, newtest))$overall[1]</code></pre>
 <pre><code>##  Accuracy 
-## 0.9943925</code></pre>
+## 0.9993203</code></pre>
 <p>Clearly, the model created by the Random Forest algorithm provides the best accuracy when used on the test set we have created. This is the model chosen for the rest of the assignment.</p>
 </div>
 <div id="apply-chosen-model-on-real-test-set" class="section level2">
