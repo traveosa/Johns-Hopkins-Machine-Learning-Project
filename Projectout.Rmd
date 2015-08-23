@@ -1,0 +1,73 @@
+Machine Learning Project Writeup
+==================================
+
+##Purpose
+
+The purpose of this project is to test the machine learning algorithms taught in this course to the test against real data.
+
+##Methodology
+
+The general procedure that I used for this project is as follows.
+
+1. Import and clean the data
+2. Create a training and test set out of the provided training set
+3. Build models, then test each one on the test set we have created
+4. Apply the best model to the actual test set.
+
+##Algorithms Used
+
+During this project, I used the following algorithms: Linear Discriminant Analysis, Quadratic Discriminant Analysis, and Random Forest Classification.
+
+##Data import and cleaning
+```{r clean, message = FALSE}
+library(dplyr)
+training <- read.csv("data/pml-training.csv", header = TRUE)
+testing <- read.csv("data/pml-testing.csv", header= TRUE)
+training <- subset(training, select = c(7:160))
+training <- training[,colSums(is.na(training)) == 0]
+training <- select(training, -contains("kurtosis"))
+training <- select(training, -contains("skewness"))
+training <- select(training, -contains("amplitude"))
+training <- select(training, -contains("min"))
+training <- select(training, -contains("max"))
+detach(package:dplyr)
+```
+
+The reason I have chosen to not include the above variables, is due to their significant amount of missing values, and the fact that they are missing in the test set, which indicates they have little to no importance on the outcome of the algorithm.
+
+##Creation of Training and Test Data
+```{r traintest, message = FALSE}
+library(caret)
+inTrain <- createDataPartition(training$classe, p = 0.7, list = FALSE)
+newtrain <- training[inTrain,]; newtest <- training[-inTrain,]
+```
+
+```{r multicore, echo = FALSE, message = FALSE}
+library(doParallel)
+registerDoParallel(cores=4)
+```
+
+##Build Models using Algorithms
+```{r buildalg, message = FALSE}
+library(randomForest)
+controls <- trainControl(method = "repeatedcv", number = 10, repeats = 10) 
+ldafit <- train(classe ~ ., data = newtrain, method = "lda", trControl = controls)
+qdafit <- train(classe ~ ., data = newtrain, method = "qda", trControl = controls)
+rforfit <- randomForest(classe ~ ., data = newtrain)
+```
+
+##Test Models on Created Test Set
+```{r testalgs}
+confusionMatrix(newtest$classe, predict(ldafit, newtest))$overall[1]
+confusionMatrix(newtest$classe, predict(qdafit, newtest))$overall[1]
+confusionMatrix(newtest$classe, predict(rforfit, newtest))$overall[1]
+```
+
+Clearly, the model created by the Random Forest algorithm provides the best accuracy when used on the test set we have created. This is the model chosen for the rest of the assignment.
+
+##Apply Chosen Model on Real Test Set
+```{r applymodel}
+testing$classe <- predict(rforfit, testing)
+testing$classe
+table(testing$classe)
+```
